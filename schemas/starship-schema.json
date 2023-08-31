@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Starship",
+    "type": "object",
+    "required": ["units"],
+    "properties": {
+      "units": {
+        "description": "Amount of units for starships",
+        "type": "integer",
+        "minimum": 0,
+        "default": 0
+      }
+    }
+  }

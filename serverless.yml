@@ -1,0 +1,136 @@
+service: extending-swapi-challenge
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: 'dynamodb:*'
+          Resource: arn:aws:dynamodb:us-east-1:471893938953:table/vehicleTable
+        - Effect: Allow
+          Action: 'dynamodb:*'
+          Resource: arn:aws:dynamodb:us-east-1:471893938987:table/starshipTable
+
+plugins:
+  - serverless-dynamodb
+  - serverless-offline
+
+package:
+  individually: true
+  patterns:
+    - "!*/**"
+
+
+custom:
+  serverless-dynamodb:
+  # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    # Uncomment only if you already have a DynamoDB running locally
+    # noStart: true
+
+functions:
+  get-vehicles:
+    handler: getVehicles/handler.default
+    package:
+      patterns:
+        - "getVehicles/handler.js"
+    events:
+      - http:
+          path: vehicle
+          method: GET
+  get-starships:
+    handler: getStarships/handler.default
+    package:
+      patterns:
+        - "getStarships/handler.js"
+    events:
+      - http:
+          path: starship
+          method: GET
+  update-vehicle:
+    handler: updateVehicle/handler.default
+    package:
+      patterns:
+        - "updateVehicle/handler.js"
+    events:
+      - http:
+          path: vehicle/{id}
+          method: PATCH
+          request:
+            parameters:
+              paths:
+                id: true
+            schemas:
+              application/json: ${file(schemas/vehicle-schema.json)}
+  update-starship:
+    handler: updateStarship/handler.default
+    package:
+      patterns:
+        - "updateStarship/handler.js"
+    events:
+      - http:
+          path: starship/{id}
+          method: PATCH
+          request:
+            parameters:
+              paths:
+                id: true
+            schemas:
+              application/json: ${file(schemas/starship-schema.json)}
+
+resources:
+  Resources:
+    vehicleTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: vehicleTable
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    starshipTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: starshipTable
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    S3Bucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        AccessControl: PublicRead
+        BucketName: bucket-serverless-swapi-challenge
+    SampleBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref S3Bucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: Allow
+              Resource: !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3Bucket
+                  - /*
+              Principal: '*'
