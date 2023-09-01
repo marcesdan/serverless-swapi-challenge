@@ -62,7 +62,7 @@ functions:
     events:
       - http:
           path: vehicle/{id}
-          method: PATCH
+          method: PUT
           request:
             parameters:
               paths:
@@ -77,7 +77,7 @@ functions:
     events:
       - http:
           path: starship/{id}
-          method: PATCH
+          method: PUT
           request:
             parameters:
               paths:
