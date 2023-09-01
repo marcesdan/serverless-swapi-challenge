@@ -45,18 +45,21 @@ functions:
       - http:
           path: vehicle
           method: GET
+          cors: true
   get-starships:
     handler: src/getStarships/handler.default
     events:
       - http:
           path: starship
           method: GET
+          cors: true
   update-vehicle:
     handler: src/updateVehicle/handler.default
     events:
       - http:
           path: vehicle/{id}
           method: PUT
+          cors: true
           request:
             parameters:
               paths:
@@ -69,6 +72,7 @@ functions:
       - http:
           path: starship/{id}
           method: PUT
+          cors: true
           request:
             parameters:
               paths:

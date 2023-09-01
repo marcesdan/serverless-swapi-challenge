@@ -1,4 +1,6 @@
 import dynamoDb from "../utils/dynamoDb";
+import getResponseError from "../utils/getResponseError";
+import getResponseOk from "../utils/getResponseOk";
 
 export default async ({ body, pathParameters: { id: pk } }) => {
   const { units } = JSON.parse(body);
@@ -9,7 +11,7 @@ export default async ({ body, pathParameters: { id: pk } }) => {
 
     if (Item) {
       // the starship exists
-      const { Attributes: starship } = await dynamoDb
+      await dynamoDb
         .update({
           TableName: "starshipTable",
           Key: { pk },
@@ -19,28 +21,19 @@ export default async ({ body, pathParameters: { id: pk } }) => {
         })
         .promise();
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ starship }),
-      };
+      return getResponseOk({ status: "ok" });
     } else {
       // it doesn't exist, so we create it
       await dynamoDb
         .put({
           TableName: "starshipTable",
-          Item: { pk, units }
+          Item: { pk, units },
         })
         .promise();
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify("ok"),
-      };
+      return getResponseOk({ status: "ok" });
     }
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify(error),
-    };
+    return getResponseError({ error });
   }
 };

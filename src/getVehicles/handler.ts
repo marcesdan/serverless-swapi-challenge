@@ -1,16 +1,10 @@
 import dynamoDb from "../utils/dynamoDb";
+import getResponseError from "../utils/getResponseError";
+import getResponseOk from "../utils/getResponseOk";
 
 export default async () =>
   dynamoDb
-    .scan({
-        TableName: "vehicleTable" 
-    })
+    .scan({ TableName: "vehicleTable" })
     .promise()
-    .then((vehicle) => ({
-      statusCode: 200,
-      body: JSON.stringify({ vehicle }),
-    }))
-    .catch((error) => ({
-      statusCode: 500,
-      body: JSON.stringify({ error }),
-    }));
+    .then((vehicle) => getResponseOk({ vehicle }))
+    .catch((error) => getResponseError({ error }));
