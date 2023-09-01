@@ -92,3 +92,6 @@ Thumbs.db
 .serverless
 .dynamodb
 package-lock.json
+
+.build/*
+.build
