@@ -1,20 +1,27 @@
 {
   "name": "serverless-swapi-challenge",
   "version": "1.0.0",
-  "description": "",
-  "type": "module",
-  "main": "handler.js",
+  "description": "Serverless swapi code challenge",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\""
+    "dev": "rimraf .build && serverless offline start",
+    "deploy": "rimraf .serverless && serverless deploy"
   },
-  "author": "",
+  "author": "Mariano César D'Angelo",
   "license": "ISC",
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
+    "@types/aws-sdk": "^2.7.0",
+    "@types/node": "^16.18.25",
+    "esbuild": "0.17.19",
+    "rimraf": "^5.0.1",
     "serverless": "^3.34.0",
     "serverless-dynamodb": "^0.2.43",
-    "serverless-offline": "^12.0.4"
+    "serverless-esbuild": "^1.46.0",
+    "serverless-offline": "^12.0.4",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.1447.0"
+    "aws-sdk": "^2.1449.0"
   }
 }

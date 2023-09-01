@@ -1,27 +1,15 @@
-import AWS from "aws-sdk";
-
-const dynamodb = new AWS.DynamoDB.DocumentClient(
-  process.env.IS_OFFLINE
-    ? {
-        region: "localhost",
-        endpoint: "http://localhost:8000",
-        accessKeyId: "DEFAULTACCESSKEY", // needed if you don't have aws credentials at all in env
-        secretAccessKey: "DEFAULT_SECRET", // needed if you don't have aws credentials at all in env
-      }
-    : {}
-);
+import dynamoDb from "../utils/dynamoDb";
 
 export default async ({ body, pathParameters: { id: pk } }) => {
   const { units } = JSON.parse(body);
   try {
-    const { Item } = await dynamodb
+    const { Item } = await dynamoDb
       .get({ TableName: "vehicleTable", Key: { pk } })
       .promise();
 
     if (Item) {
       // the vehicle exists
-      console.log("Item exists", Item);
-      const { Attributes: vehicle } = await dynamodb
+      const { Attributes: vehicle } = await dynamoDb
         .update({
           TableName: "vehicleTable",
           Key: { pk },
@@ -37,8 +25,7 @@ export default async ({ body, pathParameters: { id: pk } }) => {
       };
     } else {
       // it doesn't exist, so we create it
-      console.log("Item doesn't exist exists");
-      await dynamodb
+      await dynamoDb
         .put({
           TableName: "vehicleTable",
           Item: { pk, units }
@@ -51,7 +38,6 @@ export default async ({ body, pathParameters: { id: pk } }) => {
       };
     }
   } catch (error) {
-    console.error("Error:", error);
     return {
       statusCode: 500,
       body: JSON.stringify(error),

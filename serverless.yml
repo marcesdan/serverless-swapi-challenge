@@ -8,22 +8,25 @@ provider:
       statements:
         - Effect: Allow
           Action: 'dynamodb:*'
-          Resource: arn:aws:dynamodb:us-east-1:471893938953:table/vehicleTable
+          Resource: arn:aws:dynamodb:us-east-1:175589830385:table/vehicleTable
         - Effect: Allow
           Action: 'dynamodb:*'
-          Resource: arn:aws:dynamodb:us-east-1:471893938987:table/starshipTable
+          Resource: arn:aws:dynamodb:us-east-1:175589830385:table/starshipTable
 
 plugins:
+  - serverless-esbuild
   - serverless-dynamodb
   - serverless-offline
 
-package:
-  individually: true
-  patterns:
-    - "!*/**"
-
-
 custom:
+  esbuild:
+    bundle: true
+    minify: true
+    external:
+      - aws-sdk
+    watch:
+      pattern: [ './index.ts', 'src/**/*.ts' ]
+      ignore: [ '.serverless/**/*', '.build' ]
   serverless-dynamodb:
   # If you only want to use DynamoDB Local in some stages, declare them here
     stages:
@@ -37,28 +40,19 @@ custom:
 
 functions:
   get-vehicles:
-    handler: getVehicles/handler.default
-    package:
-      patterns:
-        - "getVehicles/handler.js"
+    handler: src/getVehicles/handler.default
     events:
       - http:
           path: vehicle
           method: GET
   get-starships:
-    handler: getStarships/handler.default
-    package:
-      patterns:
-        - "getStarships/handler.js"
+    handler: src/getStarships/handler.default
     events:
       - http:
           path: starship
           method: GET
   update-vehicle:
-    handler: updateVehicle/handler.default
-    package:
-      patterns:
-        - "updateVehicle/handler.js"
+    handler: src/updateVehicle/handler.default
     events:
       - http:
           path: vehicle/{id}
@@ -70,10 +64,7 @@ functions:
             schemas:
               application/json: ${file(schemas/vehicle-schema.json)}
   update-starship:
-    handler: updateStarship/handler.default
-    package:
-      patterns:
-        - "updateStarship/handler.js"
+    handler: src/updateStarship/handler.default
     events:
       - http:
           path: starship/{id}
@@ -113,24 +104,3 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    S3Bucket:
-      Type: 'AWS::S3::Bucket'
-      Properties:
-        AccessControl: PublicRead
-        BucketName: bucket-serverless-swapi-challenge
-    SampleBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        Bucket: !Ref S3Bucket
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Action:
-                - 's3:GetObject'
-              Effect: Allow
-              Resource: !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3Bucket
-                  - /*
-              Principal: '*'
